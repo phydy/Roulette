@@ -54,46 +54,15 @@ contract Roulette is Ownable, AutomationCompatible {
 
     uint256 public constant DOZONE_COLUMN = 2;
 
-    uint8[18] public REDS = [
-        1,
-        3,
-        5,
-        7,
-        9,
-        12,
-        14,
-        16,
-        18,
-        19,
-        21,
-        23,
-        25,
-        27,
-        30,
-        32,
-        34,
-        36
-    ];
+    bytes public constant REDS =
+        abi.encodePacked(
+            [1, 3, 5, 7, 9, 12, 14, 16, 18, 19, 21, 23, 25, 27, 30, 32, 34, 36]
+        );
 
-    uint8[18] public BLACKS = [
-        2,
-        4,
-        6,
-        8,
-        10,
-        11,
-        15,
-        17,
-        20,
-        22,
-        24,
-        26,
-        28,
-        29,
-        31,
-        33,
-        35
-    ];
+    bytes public constant BLACKS =
+        abi.encodePacked(
+            [2, 4, 6, 8, 10, 11, 13, 15, 17, 20, 22, 24, 26, 28, 29, 31, 33, 35]
+        );
     /**
      * errors
      */
@@ -202,7 +171,7 @@ contract Roulette is Ownable, AutomationCompatible {
         SpinInfo memory _spinInfo = spinInfo[spin];
         require(block.timestamp >= _spinInfo.startTime + MAX_SPIN_TIME);
         uint256 requestId = vrfCon.requestRandomWords();
-        vrfCon.addcallbackGas(3_000_000);
+        vrfCon.addcallbackGas(3_500_000);
 
         spinInfo[spin].numberRequested = requestId;
     }
@@ -224,11 +193,13 @@ contract Roulette is Ownable, AutomationCompatible {
         uint256[] memory amounts
     ) external {
         uint256 spinCount_ = spinCount;
+        SpinInfo memory _spinInfo = spinInfo[spinCount_];
+        require(block.timestamp < _spinInfo.startTime + MAX_SPIN_TIME);
         uint256 float_ = float;
         for (uint8 i = 0; i < number.length; ) {
             require(number[i] < 37, WRONG_NUMBER);
             uint256 possibleWin = ((amounts[i] * STRAIGHT_UP_PAY) + amounts[i]);
-            require(float_ > possibleWin, "reduce amount");
+            require(float_ > (possibleWin - amounts[i]), "reduce amount");
             _tokenTransfer(amounts[i]);
             numberAddressAmount[number[i]][spinCount_][
                 msg.sender
@@ -245,9 +216,11 @@ contract Roulette is Ownable, AutomationCompatible {
     }
 
     function placeConer(uint8[4] memory number, uint256 amount) external {
-        uint256 possibleWin = ((amount * COURNER_PAY) + amount);
         uint256 spinCount_ = spinCount;
-        require(float > possibleWin, "reduce amount");
+        SpinInfo memory _spinInfo = spinInfo[spinCount_];
+        require(block.timestamp < _spinInfo.startTime + MAX_SPIN_TIME);
+        uint256 possibleWin = ((amount * COURNER_PAY) + amount);
+        require(float > (possibleWin - amount), "reduce amount");
         require(
             (number[3] - number[0] == 4 && number[2] - number[1] == 2) ||
                 (number[0] == 0 &&
@@ -274,9 +247,11 @@ contract Roulette is Ownable, AutomationCompatible {
     }
 
     function placeStreet(uint8[3] memory number, uint256 amount) external {
-        uint256 possibleWin = ((amount * STREET_PAY) + amount);
         uint256 spinCount_ = spinCount;
-        require(float > possibleWin, "reduce amount");
+        SpinInfo memory _spinInfo = spinInfo[spinCount_];
+        require(block.timestamp < _spinInfo.startTime + MAX_SPIN_TIME);
+        uint256 possibleWin = ((amount * STREET_PAY) + amount);
+        require(float > (possibleWin - amount), "reduce amount");
         require(
             (number[2] - number[0] == 2 && number[2] - number[1] == 1) ||
                 (number[0] == 0 &&
@@ -302,7 +277,9 @@ contract Roulette is Ownable, AutomationCompatible {
     function placeSplit(uint8[2] memory number, uint256 amount) external {
         uint256 possibleWin = ((amount * SPLIT_PAY) + amount);
         uint256 spinCount_ = spinCount;
-        require(float > possibleWin, "reduce amount");
+        SpinInfo memory _spinInfo = spinInfo[spinCount_];
+        require(block.timestamp < _spinInfo.startTime + MAX_SPIN_TIME);
+        require(float > (possibleWin - amount), "reduce amount");
         require(
             number[1] - number[0] == 3 ||
                 number[1] - number[0] == 1 ||
@@ -328,7 +305,9 @@ contract Roulette is Ownable, AutomationCompatible {
     function placeSixLine(uint8[6] memory number, uint256 amount) external {
         uint256 possibleWin = ((amount * SIX_LINE_PAY) + amount);
         uint256 spinCount_ = spinCount;
-        require(float > possibleWin, "reduce amount");
+        SpinInfo memory _spinInfo = spinInfo[spinCount_];
+        require(block.timestamp < _spinInfo.startTime + MAX_SPIN_TIME);
+        require(float > (possibleWin - amount), "reduce amount");
         require(
             number[5] - number[0] == 5 &&
                 number[3] - number[2] == 1 &&
@@ -354,7 +333,9 @@ contract Roulette is Ownable, AutomationCompatible {
     function placeNumberSide(uint8 side_, uint256 amount) external {
         uint256 possibleWin = (amount * 2);
         uint256 spinCount_ = spinCount;
-        require(float > possibleWin, "reduce amount");
+        SpinInfo memory _spinInfo = spinInfo[spinCount_];
+        require(block.timestamp < _spinInfo.startTime + MAX_SPIN_TIME);
+        require(float > (possibleWin - amount), "reduce amount");
         _tokenTransfer(amount);
         if (side_ == 1) {
             for (uint8 i = 1; i < 19; ) {
@@ -380,10 +361,13 @@ contract Roulette is Ownable, AutomationCompatible {
     }
 
     function placeColor(uint8 color_, uint256 amount) external {
-        uint256 possibleWin = (amount * 2);
         uint256 spinCount_ = spinCount;
-        uint8[18] memory reds = REDS;
-        uint8[18] memory blacks = BLACKS;
+        SpinInfo memory _spinInfo = spinInfo[spinCount_];
+        require(block.timestamp < _spinInfo.startTime + MAX_SPIN_TIME);
+        uint256 possibleWin = (amount * 2);
+        require(float > (possibleWin - amount), "reduce amount");
+        uint8[18] memory reds = abi.decode(REDS, (uint8[18]));
+        uint8[18] memory blacks = abi.decode(BLACKS, (uint8[18]));
         _tokenTransfer(amount);
         if (color_ == 1) {
             for (uint8 i = 0; i < 18; ) {
@@ -413,10 +397,11 @@ contract Roulette is Ownable, AutomationCompatible {
     }
 
     function placeDozone(uint8 dozone_, uint256 amount) external {
-        uint256 possibleWin = ((amount * DOZONE_COLUMN) + amount);
         uint256 spinCount_ = spinCount;
-
-        require(float > possibleWin, "reduce amount");
+        SpinInfo memory _spinInfo = spinInfo[spinCount_];
+        require(block.timestamp < _spinInfo.startTime + MAX_SPIN_TIME);
+        uint256 possibleWin = ((amount * DOZONE_COLUMN) + amount);
+        require(float > (possibleWin - amount), "reduce amount");
         _tokenTransfer(amount);
         if (dozone_ == 1) {
             for (uint8 i = 1; i < 12; ) {
@@ -457,8 +442,10 @@ contract Roulette is Ownable, AutomationCompatible {
 
     function placeColumn(uint8 column_, uint256 amount) external {
         uint256 spinCount_ = spinCount;
-
+        SpinInfo memory _spinInfo = spinInfo[spinCount_];
+        require(block.timestamp < _spinInfo.startTime + MAX_SPIN_TIME);
         uint256 possibleWin = ((amount * DOZONE_COLUMN) + amount);
+        require(float > (possibleWin - amount), "reduce amount");
         _tokenTransfer(amount);
         if (column_ == 1) {
             for (uint8 i = 1; i < 35; ) {

@@ -1,13 +1,42 @@
-# Sample Hardhat Project
+# Roulette Table
 
-This project demonstrates a basic Hardhat use case. It comes with a sample contract, a test for that contract, and a script that deploys that contract.
+An onchain casino roulette powered by chainlink vrf for randomness and superfluid instant distributions
 
-Try running some of the following tasks:
+## How to deploy
 
-```shell
-npx hardhat help
-npx hardhat test
-REPORT_GAS=true npx hardhat test
-npx hardhat node
-npx hardhat run scripts/deploy.js
+clone the repo
+
+```
+$ git clone https://github.com/phydy/Roulette.git
+```
+
+in your terminal run
+
+```
+$ npm i
+```
+
+```
+$ npx hardhat run scripts/deploy.js
+```
+
+it will deploy the roulette contract, vrf and distributor
+
+add the vrf to the vrf registry
+add the roullet to the keeper registry
+
+## Test
+
+Test are done in foundry
+
+in your terminal
+
+```
+$ cd foundry-con/
+```
+
+run
+
+```
+forge test
 ```
