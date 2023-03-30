@@ -1,0 +1,7 @@
+@chainlink/=lib/chainlink/
+ds-test/=lib/forge-std/lib/ds-test/src/
+forge-std/=lib/forge-std/src/
+@superfluid/=lib/protocol-monorepo/contracts/
+@openzeppelin/=lib/openzeppelin-contracts/
+@custom/=lib/custom-supertokens/contracts/
+@solmate/=lib/solmate/src/

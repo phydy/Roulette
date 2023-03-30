@@ -1,0 +1,60 @@
+{
+  "abi": [],
+  "bytecode": {
+    "object": "0x",
+    "linkReferences": {}
+  },
+  "deployedBytecode": {
+    "object": "0x",
+    "linkReferences": {}
+  },
+  "ast": {
+    "absolutePath": "contracts/test/VRFCordinatorMock.sol",
+    "id": 1720,
+    "exportedSymbols": {
+      "LinkTokenInterface": [
+        2054
+      ],
+      "VRFConsumerBaseV2": [
+        1959
+      ],
+      "VRFCoordinatorV2Interface": [
+        2166
+      ],
+      "VRFCoordinatorV2Mock": [
+        3029
+      ]
+    },
+    "nodeType": "SourceUnit",
+    "src": "31:96:6",
+    "nodes": [
+      {
+        "id": 1718,
+        "nodeType": "PragmaDirective",
+        "src": "31:23:6",
+        "nodes": [],
+        "literals": [
+          "solidity",
+          "^",
+          "0.8",
+          ".0"
+        ]
+      },
+      {
+        "id": 1719,
+        "nodeType": "ImportDirective",
+        "src": "56:70:6",
+        "nodes": [],
+        "absolutePath": "node_modules/@chainlink/contracts/src/v0.8/mocks/VRFCoordinatorV2Mock.sol",
+        "file": "@chainlink/contracts/src/v0.8/mocks/VRFCoordinatorV2Mock.sol",
+        "nameLocation": "-1:-1:-1",
+        "scope": 1720,
+        "sourceUnit": 3030,
+        "symbolAliases": [],
+        "unitAlias": ""
+      }
+    ],
+    "license": "MIT"
+  },
+  "id": 6
+}
