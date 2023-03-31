@@ -40,3 +40,13 @@ run
 ```
 forge test
 ```
+
+## Project Info
+
+### Mubai
+
+Contract(keeper compatible): 0x86178273A8FC5069d03A117AD67B504FBc4B9b16
+
+VRF id: 636
+
+IDA contract: 0xF17fA5ff48E041dB8db66956D2AfC83d0ad3E9Fd
