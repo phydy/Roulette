@@ -18,7 +18,7 @@ contract Roulette is Ownable, AutomationCompatible {
     //spin tracker
     uint256 public spinCount;
 
-    uint256 public constant MAX_SPIN_TIME = 10 minutes;
+    uint256 public constant MAX_SPIN_TIME = 20 minutes;
 
     IVRF private vrfCon;
 
@@ -157,8 +157,12 @@ contract Roulette is Ownable, AutomationCompatible {
         (bool success, uint8 number_) = vrfCon.getRequestStatus(
             spin.numberRequested
         );
-        if (!success) {
-            revert Transfer__Failed();
+
+        if (
+            !success &&
+            block.timestamp >= (spin.startTime + MAX_SPIN_TIME + 2 minutes)
+        ) {
+            vrfCon.addcallbackGas(4_500_000);
         }
         spin.hasBeenDecided = true;
         spin.winningNumber = number_;
@@ -188,7 +192,7 @@ contract Roulette is Ownable, AutomationCompatible {
         }
     }
 
-    function placeStaightUps(
+    function placeStraightUps(
         uint8[] memory number,
         uint256[] memory amounts
     ) external {
@@ -329,6 +333,44 @@ contract Roulette is Ownable, AutomationCompatible {
         float -= (possibleWin - amount);
         emit BetPlaced("six", msg.sender, amount);
     }
+
+    //function placeEvenOdd(uint8 side_, uint256 amount) external {
+    //    uint256 possibleWin = (amount * 2);
+    //    uint256 spinCount_ = spinCount;
+    //    SpinInfo memory _spinInfo = spinInfo[spinCount_];
+    //    require(block.timestamp < _spinInfo.startTime + MAX_SPIN_TIME);
+    //    require(float > (possibleWin - amount), "reduce amount");
+    //    _tokenTransfer(amount);
+    //    if (side_ == 1) {
+    //        for (uint8 i = 1; i < 37; ) {
+    //            if (i % 2 == 0) {
+    //                numberAddressAmount[i][spinCount_][
+    //                    msg.sender
+    //                ] += possibleWin;
+    //            }
+    //
+    //            unchecked {
+    //                i++;
+    //            }
+    //        }
+    //    } else {
+    //        for (uint8 i = 1; i < 37; ) {
+    //            if (i % 2 != 0) {
+    //                numberAddressAmount[i][spinCount_][
+    //                    msg.sender
+    //                ] += possibleWin;
+    //            }
+    //
+    //            unchecked {
+    //                i++;
+    //            }
+    //        }
+    //    }
+    //    _addAmounts(amount, possibleWin);
+    //    inPlay += (amount + possibleWin);
+    //    float -= amount;
+    //    emit BetPlaced("H_L", msg.sender, amount);
+    //}
 
     function placeNumberSide(uint8 side_, uint256 amount) external {
         uint256 possibleWin = (amount * 2);

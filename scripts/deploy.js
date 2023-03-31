@@ -34,11 +34,11 @@ async function main() {
   console.log(
     `deployed to ${roulete.address}`
   );
-  //run("verify:verify", {
-  //    address: roulete.address,
-  //    constructorArguments: [TOKEN],
-  //});
-//
+  run("verify:verify", {
+      address: roulete.address,
+      constructorArguments: [TOKEN],
+  });
+
   const signer = await ethers.getSigner();
 
   console.log("approving...")
@@ -76,10 +76,10 @@ async function main() {
       `Random Number Consumer deployed to ${randomNumberConsumerV2.address} on ${network.name}`
   )
 
-  //run("verify:verify", {
-  //    address: randomNumberConsumerV2.address,
-  //    constructorArguments: [subscriptionId, KEY_HASH, vrfCoordinatorAddress, roulete.address],
-  //});
+  run("verify:verify", {
+      address: randomNumberConsumerV2.address,
+      constructorArguments: [subscriptionId, KEY_HASH, vrfCoordinatorAddress, roulete.address],
+  });
 
 
   console.log("deploying dist")
@@ -88,11 +88,11 @@ async function main() {
 
   await dist.deployed();
   await dist.deployTransaction.wait(waitBlockConfirmations);
-//run("verify:verify", {
-//    address: dist.address,
-//    constructorArguments: [TOKEN, roulete.address],
-//});
-//
+  run("verify:verify", {
+      address: dist.address,
+      constructorArguments: [TOKEN, roulete.address],
+  });
+  
   console.log(
     `deployed to ${dist.address}`
   );
