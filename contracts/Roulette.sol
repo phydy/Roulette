@@ -163,11 +163,12 @@ contract Roulette is Ownable, AutomationCompatible {
             block.timestamp >= (spin.startTime + MAX_SPIN_TIME + 2 minutes)
         ) {
             vrfCon.addcallbackGas(4_500_000);
+        } else {
+            spin.hasBeenDecided = true;
+            spin.winningNumber = number_;
+            vrfCon.addcallbackGas(2_500_000);
+            emit SetNumber(_spinCount, number_);
         }
-        spin.hasBeenDecided = true;
-        spin.winningNumber = number_;
-        vrfCon.addcallbackGas(2_500_000);
-        emit SetNumber(_spinCount, number_);
     }
 
     function getWinningNumber() public {
