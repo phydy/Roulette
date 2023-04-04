@@ -51,8 +51,10 @@ contract VRFv2Consumer is VRFConsumerBaseV2, ConfirmedOwner {
     // Assumes the subscription is funded sufficiently.
     function requestRandomWords()
         external
-        onlyOwner
-        returns (uint256 requestId)
+        returns (
+            //onlyOwner
+            uint256 requestId
+        )
     {
         // Will revert if subscription is not set and funded.
         requestId = COORDINATOR.requestRandomWords(
@@ -63,30 +65,23 @@ contract VRFv2Consumer is VRFConsumerBaseV2, ConfirmedOwner {
             numWords
         );
         s_requests[requestId] = RequestStatus({
-            finalNumber: 0,
+            finalNumber: 37,
             requestor: msg.sender,
             fulfilled: false
         });
         lastRequestId = requestId;
         emit RequestSent(requestId, numWords);
-        return requestId;
     }
 
     function fulfillRandomWords(
         uint256 _requestId,
         uint256[] memory _randomWords
     ) internal override {
-        require(
-            s_requests[_requestId].requestor != address(0),
-            "request not found"
-        );
         s_requests[_requestId].fulfilled = true;
         uint256 number = _randomWords[0] + _randomWords[1];
         uint256 _num = number % 37;
         uint8 _finalNumber = uint8(_num);
         s_requests[_requestId].finalNumber = _finalNumber;
-
-        //IRoulet(s_requests[_requestId].requestor).setNumber(finalNumber);
 
         emit RequestFulfilled(_requestId, _randomWords);
     }

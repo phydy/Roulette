@@ -18,7 +18,7 @@ contract Roulette is Ownable, AutomationCompatible {
     //spin tracker
     uint256 public spinCount;
 
-    uint256 public constant MAX_SPIN_TIME = 20 minutes;
+    uint256 public constant MAX_SPIN_TIME = 5 minutes;
 
     IVRF private vrfCon;
 
@@ -147,27 +147,27 @@ contract Roulette is Ownable, AutomationCompatible {
     }
 
     function setNumber() public {
-        (bool requested, bool decided, bool hasEnded) = _checkSpin();
-
-        require(requested && !decided && !hasEnded);
-
         uint256 _spinCount = spinCount;
 
         SpinInfo storage spin = spinInfo[_spinCount];
         (bool success, uint8 number_) = vrfCon.getRequestStatus(
             spin.numberRequested
         );
-
-        if (
-            !success &&
-            block.timestamp >= (spin.startTime + MAX_SPIN_TIME + 2 minutes)
-        ) {
-            vrfCon.addcallbackGas(4_500_000);
-        } else {
+        if (success && number_ != 37) {
             spin.hasBeenDecided = true;
             spin.winningNumber = number_;
             vrfCon.addcallbackGas(2_500_000);
             emit SetNumber(_spinCount, number_);
+        } else if (
+            !success &&
+            block.timestamp >= (spin.startTime + MAX_SPIN_TIME + 2 minutes) &&
+            (number_ == 37)
+        ) {
+            vrfCon.addcallbackGas(2_500_000);
+            uint256 requestId = vrfCon.requestRandomWords();
+            vrfCon.addcallbackGas(5_000_000);
+
+            spinInfo[_spinCount].numberRequested = requestId;
         }
     }
 
@@ -176,7 +176,7 @@ contract Roulette is Ownable, AutomationCompatible {
         SpinInfo memory _spinInfo = spinInfo[spin];
         require(block.timestamp >= _spinInfo.startTime + MAX_SPIN_TIME);
         uint256 requestId = vrfCon.requestRandomWords();
-        vrfCon.addcallbackGas(3_500_000);
+        vrfCon.addcallbackGas(4_500_000);
 
         spinInfo[spin].numberRequested = requestId;
     }
@@ -614,14 +614,16 @@ contract Roulette is Ownable, AutomationCompatible {
             performData = abi.encodePacked(uint256(3));
             upkeepNeeded = true;
         } else if (
-            _spinInfo.numberRequested != 0 && !_spinInfo.hasBeenDecided
+            _spinInfo.numberRequested != 0 &&
+            !_spinInfo.hasBeenDecided &&
+            _spinInfo.winningNumber == 37
         ) {
             performData = abi.encodePacked(uint256(2));
             upkeepNeeded = true;
         } else if (
             block.timestamp >= _spinInfo.startTime + MAX_SPIN_TIME &&
             !_spinInfo.hasBeenDecided &&
-            _spinInfo.winningNumber > 36
+            _spinInfo.winningNumber == 37
         ) {
             performData = abi.encodePacked(uint256(1));
             upkeepNeeded = true;
